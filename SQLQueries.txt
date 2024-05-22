@@ -1,0 +1,38 @@
+use master;
+
+select * from df_top100;
+select * from df_indian_indices;
+select * from df_global_indices;
+select * from df_active_indices;
+select * from df_gainers;
+select * from df_losers;
+select * from df_commodity;
+select * from df_currency;
+select * from df_news;
+select * from df_other;
+--change names of 52_wk_high and 52_wk_low since 52 in the beginning is problematic and does not follow the naming convention.
+--select 52_wk_high from abc would give 52 as the value and _wk_high as the column name 
+EXEC sp_rename 'df_top100.52_wk_low', 'low_52_wk', 'COLUMN';
+--similarly index as a column name is problematic. Hence, wherever index is a column name, change it to name
+
+--Q1. identify companies from the top 100 list which are most actively traded today
+select * from df_top100 where company_name in (select index_name from df_active_indices);
+
+--Q2. Identify stocks which are top losers for the day and has been actively traded and is a top 100 company
+select company_name,market_cap_cr,last_price as opening_price,price as closing_price,
+round(100*(price-last_price)/last_price,2) as perc_change,value_cr as total_value_cr,
+high_52_wk,low_52_wk,round(100*(high_52_wk-low_52_wk)/low_52_wk,2) as perc_diff_high_low
+from df_top100 c join (select a.*,b.perc_loss from df_active_indices a join df_losers b 
+on a.index_name=b.index_name)x
+on c.company_name=x.index_name;
+
+--Q3. Combined both top gainers and losers, find the rolling sum of index_names ordered by price
+select *, sum(price) over(order by price rows between unbounded preceding and current row) as rolling_sum
+from (select * from df_gainers union select * from df_losers)X;
+
+--Q4. From the above combined table, we get the total sum of all the prices. Now, we want to find which indian indices have 
+--their price value less than this sum
+select * from df_indian_indices where price < (select sum(price) from (
+select * from df_gainers union select * from df_losers)X)
+
+
