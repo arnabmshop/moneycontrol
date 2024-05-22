@@ -1,9 +1,5 @@
 # moneycontrol
 
-Certainly! Here's a detailed README file for your ETL project with Tableau visualization:
-
----
-
 # ETL and Tableau Visualization Project
 
 ## Overview
@@ -135,7 +131,3 @@ This project is an end-to-end ETL (Extract, Transform, Load) pipeline that reads
 ## License
 
 This project is licensed under the MIT License.
-
----
-
-Feel free to customize this template further based on the specific details and requirements of your project.
